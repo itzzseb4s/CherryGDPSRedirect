@@ -10,6 +10,8 @@ class $modify(CherryCCHttpRequest, CCHttpRequest) {
             return;
         }
 
+        log::info("Cherry GDPS: intercepted URL: {}", url);
+
         std::string original(url);
 
         constexpr std::string_view official =
@@ -25,10 +27,7 @@ class $modify(CherryCCHttpRequest, CCHttpRequest) {
                 cherry
             );
 
-            log::info(
-                "Cherry GDPS: {}",
-                original
-            );
+            log::info("Cherry GDPS: REDIRECTED TO: {}", original);
         }
 
         CCHttpRequest::setUrl(original.c_str());
