@@ -3,6 +3,12 @@
 
 using namespace geode::prelude;
 
+$on_mod(Loaded) {
+    log::info("================================");
+    log::info("CHERRY GDPS REDIRECT LOADED");
+    log::info("================================");
+}
+
 class $modify(CherryCCHttpRequest, CCHttpRequest) {
     void setUrl(char const* url) {
         if (url == nullptr) {
