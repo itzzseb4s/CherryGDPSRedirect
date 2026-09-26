@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CherryGDPSRedirect VERSION 1.0.0)
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(CherryGDPSRedirect VERSION 1.0.0)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+    src/*.cpp
+)
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "GEODE_SDK environment variable is not set")
@@ -14,8 +20,4 @@ add_subdirectory(
     ${CMAKE_CURRENT_BINARY_DIR}/geode
 )
 
-setup_geode_mod(
-    TARGET CherryGDPSRedirect
-    SOURCES
-        src/main.cpp
-)
+setup_geode_mod(${PROJECT_NAME})
