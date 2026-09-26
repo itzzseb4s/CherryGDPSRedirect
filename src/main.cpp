@@ -1,48 +1,36 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/HttpRequest.hpp>
+#include <Geode/modify/CCHttpRequest.hpp>
 
 using namespace geode::prelude;
 
-namespace {
-    constexpr char OFFICIAL_DATABASE[] =
-        "https://www.boomlings.com/database";
-
-    constexpr char CHERRY_DATABASE[] =
-        "https://playersbro.ps.fhgdps.com";
-
-    std::string redirectURL(char const* url) {
+class $modify(CherryCCHttpRequest, CCHttpRequest) {
+    void setUrl(char const* url) {
         if (url == nullptr) {
-            return {};
+            CCHttpRequest::setUrl(url);
+            return;
         }
 
         std::string original(url);
 
-        if (original.rfind(OFFICIAL_DATABASE, 0) != 0) {
-            return original;
+        constexpr std::string_view official =
+            "https://www.boomlings.com/database";
+
+        constexpr std::string_view cherry =
+            "https://playersbro.ps.fhgdps.com";
+
+        if (original.starts_with(official)) {
+            original.replace(
+                0,
+                official.size(),
+                cherry
+            );
+
+            log::info(
+                "Cherry GDPS: {}",
+                original
+            );
         }
 
-        auto redirected = original;
-
-        redirected.replace(
-            0,
-            std::string(OFFICIAL_DATABASE).size(),
-            CHERRY_DATABASE
-        );
-
-        log::info(
-            "Cherry GDPS redirect: {} -> {}",
-            original,
-            redirected
-        );
-
-        return redirected;
-    }
-}
-
-class $modify(CherryHttpRequest, cocos2d::extension::CCHttpRequest) {
-    void setUrl(char const* url) {
-        auto redirected = redirectURL(url);
-
-        CCHttpRequest::setUrl(redirected.c_str());
+        CCHttpRequest::setUrl(original.c_str());
     }
 };
