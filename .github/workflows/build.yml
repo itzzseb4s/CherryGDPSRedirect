@@ -1,0 +1,28 @@
+name: Build Cherry GDPS Redirect
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Android64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Geode mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          sdk: given
+          target: Android64
+
+      - name: Upload Geode mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGDPSRedirect-Android64
+          path: output/*.geode
