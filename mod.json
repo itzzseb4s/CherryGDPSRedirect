@@ -4,8 +4,8 @@
         "android": "2.2081"
     },
     "id": "cherry.gdps-redirect",
-    "name": "Cherry GDPS Redirect TEST",
-    "version": "v1.0.2",
-    "developer": "Cherry GDPS",
-    "description": "TEST VERSION"
+    "name": "Cherry GDPS",
+    "version": "v1.0.0-beta.1",
+    "developer": "Cherry",
+    "description": "Version test de Cherry GDPS para Geode"
 }
