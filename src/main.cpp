@@ -12,7 +12,10 @@ namespace {
         "https://playersbro.ps.fhgdps.com";
 
     constexpr std::string_view LEVEL_ENDPOINT =
-        "playersbro.ps.fhgdps.com/getGJLevels21.php";
+        "getGJLevels21.php";
+
+    constexpr std::string_view LOGIN_ENDPOINT =
+        "loginGJAccount.php";
 
 
     // ============================================================
@@ -39,6 +42,7 @@ namespace {
                 return;
             }
 
+
             auto request = response->getHttpRequest();
 
             if (request == nullptr) {
@@ -48,21 +52,38 @@ namespace {
                 return;
             }
 
+
             auto url = request->getUrl();
 
             if (url == nullptr) {
                 return;
             }
 
+
             std::string_view urlView(url);
 
-            // Solo analizar getGJLevels21.php
-            if (
+
+            // ----------------------------------------------------
+            // DETECT ENDPOINT
+            // ----------------------------------------------------
+
+            bool isLevelsRequest =
                 urlView.find(LEVEL_ENDPOINT)
-                == std::string_view::npos
+                != std::string_view::npos;
+
+            bool isLoginRequest =
+                urlView.find(LOGIN_ENDPOINT)
+                != std::string_view::npos;
+
+
+            // Ignore everything else
+            if (
+                !isLevelsRequest &&
+                !isLoginRequest
             ) {
                 return;
             }
+
 
             log::info(
                 "================================"
@@ -71,6 +92,23 @@ namespace {
             log::info(
                 "Cherry GDPS: RESPONSE RECEIVED"
             );
+
+
+            if (isLoginRequest) {
+                log::info(
+                    "TYPE: ACCOUNT LOGIN"
+                );
+            }
+            else if (isLevelsRequest) {
+                log::info(
+                    "TYPE: LEVEL SEARCH"
+                );
+            }
+
+
+            // ----------------------------------------------------
+            // HTTP INFORMATION
+            // ----------------------------------------------------
 
             log::info(
                 "HTTP CODE: {}",
@@ -110,7 +148,9 @@ namespace {
             // RESPONSE DATA
             // ----------------------------------------------------
 
-            auto data = response->getResponseData();
+            auto data =
+                response->getResponseData();
+
 
             if (
                 data == nullptr ||
@@ -145,81 +185,151 @@ namespace {
             );
 
 
-            // ----------------------------------------------------
-            // -1
-            // ----------------------------------------------------
+            // ====================================================
+            // LOGIN RESPONSE
+            // ====================================================
 
-            if (body == "-1") {
+            if (isLoginRequest) {
 
-                log::error(
-                    "Cherry GDPS: SERVER RETURNED -1"
-                );
+                if (body == "-1") {
 
-                log::info(
-                    "RESULT: ERROR (-1)"
-                );
-            }
-
-
-            // ----------------------------------------------------
-            // EMPTY / METADATA
-            // ----------------------------------------------------
-
-            else if (
-                body == "#" ||
-                body.starts_with("##")
-            ) {
-
-                log::warn(
-                    "Cherry GDPS: NO LEVEL DATA"
-                );
-
-                log::info(
-                    "RESULT: EMPTY / METADATA"
-                );
-
-                log::info(
-                    "RESPONSE: {}",
-                    body
-                );
-            }
-
-
-            // ----------------------------------------------------
-            // LEVEL DATA
-            // ----------------------------------------------------
-
-            else {
-
-                log::info(
-                    "Cherry GDPS: RESPONSE CONTAINS DATA"
-                );
-
-                log::info(
-                    "RESULT: LEVEL DATA DETECTED"
-                );
-
-
-                constexpr size_t MAX_LOG_LENGTH = 500;
-
-
-                if (body.size() > MAX_LOG_LENGTH) {
+                    log::error(
+                        "Cherry GDPS: LOGIN REJECTED (-1)"
+                    );
 
                     log::info(
-                        "RESPONSE: {}...",
-                        body.substr(
-                            0,
-                            MAX_LOG_LENGTH
-                        )
+                        "RESULT: LOGIN FAILED"
                     );
 
                 }
                 else {
 
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Do not print the complete login response.
+                     * It can contain account/session information.
+                     */
+
+                    log::info(
+                        "Cherry GDPS: LOGIN RESPONSE RECEIVED"
+                    );
+
+                    log::info(
+                        "RESULT: LOGIN RESPONSE IS NOT -1"
+                    );
+
+                    /*
+                     * Show only a short prefix for diagnosis.
+                     */
+
+                    constexpr size_t MAX_LOGIN_LOG = 80;
+
+                    if (body.size() > MAX_LOGIN_LOG) {
+
+                        log::info(
+                            "RESPONSE PREFIX: {}...",
+                            body.substr(
+                                0,
+                                MAX_LOGIN_LOG
+                            )
+                        );
+
+                    }
+                    else {
+
+                        log::info(
+                            "RESPONSE PREFIX: {}",
+                            body
+                        );
+                    }
+                }
+
+                log::info(
+                    "================================"
+                );
+
+                return;
+            }
+
+
+            // ====================================================
+            // LEVEL RESPONSE
+            // ====================================================
+
+            if (isLevelsRequest) {
+
+                if (body == "-1") {
+
+                    log::error(
+                        "Cherry GDPS: SERVER RETURNED -1"
+                    );
+
+                    log::info(
+                        "RESULT: LEVEL REQUEST FAILED"
+                    );
+
+                }
+
+                else if (
+                    body == "#" ||
+                    body.starts_with("##")
+                ) {
+
+                    log::warn(
+                        "Cherry GDPS: NO LEVEL DATA"
+                    );
+
+                    log::info(
+                        "RESULT: EMPTY / METADATA"
+                    );
+
                     log::info(
                         "RESPONSE: {}",
                         body
                     );
+                }
+
+                else {
+
+                    log::info(
+                        "Cherry GDPS: RESPONSE CONTAINS DATA"
+                    );
+
+                    log::info(
+                        "RESULT: LEVEL DATA DETECTED"
+                    );
+
+
+                    /*
+                     * Only print the beginning.
+                     * Level responses can be very large.
+                     */
+
+                    constexpr size_t MAX_LEVEL_LOG = 500;
+
+
+                    if (
+                        body.size() >
+                        MAX_LEVEL_LOG
+                    ) {
+
+                        log::info(
+                            "RESPONSE: {}...",
+                            body.substr(
+                                0,
+                                MAX_LEVEL_LOG
+                            )
+                        );
+
+                    }
+                    else {
+
+                        log::info(
+                            "RESPONSE: {}",
+                            body
+                        );
+                    }
                 }
             }
 
@@ -267,18 +377,28 @@ class $modify(
     ) {
 
         if (request == nullptr) {
+
             CCHttpClient::send(request);
+
             return;
         }
 
 
-        auto url = request->getUrl();
+        auto url =
+            request->getUrl();
+
 
         if (url == nullptr) {
+
             CCHttpClient::send(request);
+
             return;
         }
 
+
+        // --------------------------------------------------------
+        // ORIGINAL URL
+        // --------------------------------------------------------
 
         log::info(
             "Cherry GDPS: REQUEST: {}",
@@ -304,13 +424,18 @@ class $modify(
             );
 
 
-            // Evitar //
+            // ----------------------------------------------------
+            // PREVENT DOUBLE SLASH
+            // ----------------------------------------------------
+
             constexpr std::string_view DOUBLE_SLASH =
                 "https://playersbro.ps.fhgdps.com//";
 
 
             if (
-                redirected.starts_with(DOUBLE_SLASH)
+                redirected.starts_with(
+                    DOUBLE_SLASH
+                )
             ) {
 
                 redirected.erase(
@@ -333,18 +458,40 @@ class $modify(
 
 
         // --------------------------------------------------------
-        // CAPTURAR getGJLevels21.php
+        // RESPONSE CAPTURE
         // --------------------------------------------------------
 
-        if (
+        bool isLevelsRequest =
             redirected.find(
-                "playersbro.ps.fhgdps.com/getGJLevels21.php"
+                "getGJLevels21.php"
             )
-            != std::string::npos
+            != std::string::npos;
+
+
+        bool isLoginRequest =
+            redirected.find(
+                "loginGJAccount.php"
+            )
+            != std::string::npos;
+
+
+        /*
+         * Capture only:
+         *
+         * getGJLevels21.php
+         * loginGJAccount.php
+         *
+         * We leave all other requests alone.
+         */
+
+        if (
+            isLevelsRequest ||
+            isLoginRequest
         ) {
 
             request->setResponseCallback(
                 CherryResponseHandler::get(),
+
                 httpresponse_selector(
                     CherryResponseHandler::onResponse
                 )
@@ -353,7 +500,7 @@ class $modify(
 
 
         // --------------------------------------------------------
-        // ENVIAR PETICIÓN
+        // SEND REQUEST
         // --------------------------------------------------------
 
         CCHttpClient::send(request);
