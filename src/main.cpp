@@ -1,5 +1,5 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/CCHttpRequest.hpp>
+#include <Geode/modify/CCHttpClient.hpp>
 
 using namespace geode::prelude;
 
@@ -9,16 +9,21 @@ $on_mod(Loaded) {
     log::info("================================");
 }
 
-class $modify(CherryCCHttpRequest, CCHttpRequest) {
-    void setUrl(char const* url) {
-        if (url == nullptr) {
-            CCHttpRequest::setUrl(url);
+class $modify(CherryCCHttpClient, CCHttpClient) {
+    void send(CCHttpRequest* request) {
+        if (request == nullptr) {
+            CCHttpClient::send(request);
             return;
         }
 
-        log::info("Cherry GDPS: intercepted URL: {}", url);
+        auto url = request->getUrl();
 
-        std::string original(url);
+        if (url == nullptr) {
+            CCHttpClient::send(request);
+            return;
+        }
+
+        log::info("Cherry GDPS: REQUEST: {}", url);
 
         constexpr std::string_view official =
             "https://www.boomlings.com/database";
@@ -26,16 +31,23 @@ class $modify(CherryCCHttpRequest, CCHttpRequest) {
         constexpr std::string_view cherry =
             "https://playersbro.ps.fhgdps.com";
 
-        if (original.starts_with(official)) {
-            original.replace(
+        std::string redirected(url);
+
+        if (redirected.starts_with(official)) {
+            redirected.replace(
                 0,
                 official.size(),
                 cherry
             );
 
-            log::info("Cherry GDPS: REDIRECTED TO: {}", original);
+            request->setUrl(redirected.c_str());
+
+            log::info(
+                "Cherry GDPS: REDIRECTED: {}",
+                redirected
+            );
         }
 
-        CCHttpRequest::setUrl(original.c_str());
+        CCHttpClient::send(request);
     }
 };
