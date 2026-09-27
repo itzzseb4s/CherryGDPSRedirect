@@ -4,8 +4,8 @@
         "android": "2.2081"
     },
     "id": "cherry.gdps-redirect",
-    "name": "Cherry GDPS Redirect",
-    "version": "v1.0.0",
+    "name": "Cherry GDPS Redirect TEST",
+    "version": "v1.0.1",
     "developer": "Cherry GDPS",
-    "description": "Redirects Geometry Dash database requests to Cherry GDPS."
+    "description": "TEST VERSION"
 }
