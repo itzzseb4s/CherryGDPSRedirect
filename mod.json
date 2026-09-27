@@ -1,11 +1,11 @@
 {
-    "geode": "5.8.2",
+    "geode": "5.10.1",
     "gd": {
         "android": "2.2081"
     },
     "id": "cherry.gdps-redirect",
     "name": "Cherry GDPS Redirect TEST",
-    "version": "v1.0.1",
+    "version": "v1.0.2",
     "developer": "Cherry GDPS",
     "description": "TEST VERSION"
 }
