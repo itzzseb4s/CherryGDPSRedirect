@@ -29,7 +29,7 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
             "https://www.boomlings.com/database";
 
         constexpr std::string_view cherry =
-            "https://playersbro.ps.fhgdps.com/";
+            "https://playersbro.ps.fhgdps.com";
 
         std::string redirected(url);
 
@@ -39,6 +39,13 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
                 official.size(),
                 cherry
             );
+
+            // Evitar doble "/" después del dominio
+            if (redirected.starts_with(
+                "https://playersbro.ps.fhgdps.com//"
+            )) {
+                redirected.replace(34, 2, "/");
+            }
 
             request->setUrl(redirected.c_str());
 
