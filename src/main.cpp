@@ -29,7 +29,7 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
             "https://www.boomlings.com/database";
 
         constexpr std::string_view cherry =
-            "https://playersbro.ps.fhgdps.com";
+            "https://playersbro.ps.fhgdps.com/";
 
         std::string redirected(url);
 
