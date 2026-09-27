@@ -50,16 +50,13 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
             );
         }
 
-        // IMPORTANT:
-        // Do NOT replace the original Geometry Dash callback.
-        // CCHttpClient will now send the response back to GD's
-        // original handler.
-
+        // Keep Geometry Dash's original callback.
         CCHttpClient::send(request);
     }
 };
 
 $on_mod(Loaded) {
+
     log::info(
         "================================"
     );
@@ -67,6 +64,25 @@ $on_mod(Loaded) {
     log::info(
         "CHERRY GDPS REDIRECT LOADED"
     );
+
+    log::info(
+        "Cherry Mode: unlinking current account..."
+    );
+
+    auto accountManager = GJAccountManager::get();
+
+    if (accountManager != nullptr) {
+        accountManager->unlinkFromAccount();
+
+        log::info(
+            "Cherry Mode: account unlinked successfully"
+        );
+    }
+    else {
+        log::error(
+            "Cherry Mode: GJAccountManager is NULL"
+        );
+    }
 
     log::info(
         "================================"
