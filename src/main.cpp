@@ -23,7 +23,12 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
             return;
         }
 
-        log::info("Cherry GDPS: REQUEST: {}", url);
+        log::info("================================");
+        log::info("Cherry GDPS: REQUEST");
+        log::info("URL: {}", url);
+        log::info("METHOD: {}", static_cast<int>(request->getRequestType()));
+        log::info("BODY: {}", request->getRequestData());
+        log::info("================================");
 
         constexpr std::string_view official =
             "https://www.boomlings.com/database";
@@ -40,7 +45,6 @@ class $modify(CherryCCHttpClient, CCHttpClient) {
                 cherry
             );
 
-            // Evitar doble "/" después del dominio
             if (redirected.starts_with(
                 "https://playersbro.ps.fhgdps.com//"
             )) {
